@@ -1,0 +1,27 @@
+public class PEMHandler {
+	static byte[] loadPEM(String filename) throws IOException {
+		FileInputStream fis = new FileInputStream(filename);	
+	    String pem = new String(fis.readAllBytes(), StandardCharsets.ISO_8859_1);
+	    Pattern parse = Pattern.compile("(?m)(?s)^---BEGIN.---$(.)^---END.---$.");
+	    String encoded = parse.matcher(pem).replaceFirst("$1");
+	    return Base64.decode(encoded);
+	}
+	
+	static PublicKey getPublicKeyfromPEM(String filename) throws IOException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException {
+		byte []decoded = loadPEM(filename);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+	    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	    X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
+	    PublicKey pubKey = kf.generatePublic(spec);
+	    return pubKey;
+	}
+	
+	static PrivateKey getPrivateKeyfromPEM(String filename) throws IOException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException {
+		byte []decoded = loadPEM(filename);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+	    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+	    PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decoded);
+	    PrivateKey privKey = kf.generatePrivate(spec);
+	    return privKey;
+	}
+}
